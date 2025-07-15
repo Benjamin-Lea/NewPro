@@ -48,7 +48,7 @@ const EnergyDataGraph: React.FC = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div style={{ width: '100%', height: '30vh' }}>
+    <div style={{ width: '75%', height: '30vh', alignSelf: 'center', margin: '0 auto' }}>
       <div style={{ marginBottom: '1rem' }}>
         {PERIODS.map((p) => (
           <Button
