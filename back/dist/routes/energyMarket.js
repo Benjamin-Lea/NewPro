@@ -45,76 +45,89 @@ router.get('/range', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch records' });
     }
 });
+// Date calculation utilities
+const getDateRange = (type) => {
+    const end = new Date();
+    const start = new Date();
+    switch (type) {
+        case '6months':
+            start.setMonth(end.getMonth() - 6);
+            break;
+        case 'all':
+            return { end, start: new Date(0) };
+        case 'day':
+            start.setDate(end.getDate() - 1);
+            break;
+        case 'month':
+            start.setMonth(end.getMonth() - 1);
+            break;
+        case 'week':
+            start.setDate(end.getDate() - 7);
+            break;
+        case 'year':
+            start.setFullYear(end.getFullYear() - 1);
+            break;
+        default:
+            throw new Error('Invalid period type');
+    }
+    return { end, start };
+};
+// Data fetching utilities
+const fetchAggregatedRecords = async (start, end) => {
+    const startMs = start.getTime();
+    const endMs = end.getTime();
+    return await prisma.$queryRaw `
+    SELECT
+      DATE("dateBeginGMT" / 1000, 'unixepoch', 'weekday 0') AS "dateBeginGMT", 
+      AVG("actualAIL") AS "actualAIL",
+      AVG("actualPoolPrice") AS "actualPoolPrice"
+    FROM
+      "energyMarketData"
+    WHERE
+      "dateBeginGMT" BETWEEN ${startMs} AND ${endMs} AND "actualPoolPrice" != 0
+    GROUP BY
+      DATE("dateBeginGMT" / 1000, 'unixepoch', 'weekday 0')
+    ORDER BY
+      "dateBeginGMT" ASC;
+  `;
+};
+const fetchDetailedRecords = async (start, end) => {
+    const records = await prisma.energyMarketData.findMany({
+        orderBy: { dateBeginGMT: 'asc' },
+        select: {
+            actualAIL: true,
+            actualPoolPrice: true,
+            dateBeginGMT: true,
+        },
+        where: {
+            actualPoolPrice: { not: 0 },
+            dateBeginGMT: { gte: start, lte: end },
+        },
+    });
+    return records.map(record => ({
+        ...record,
+        dateBeginGMT: new Date(record.dateBeginGMT).toLocaleString("en-CA", {
+            hour12: false,
+            timeZone: "America/Edmonton"
+        }).replace(',', '')
+    }));
+};
+// Main route handler
 router.get('/period/:type', async (req, res) => {
     const { type } = req.params;
-    let start;
-    const end = new Date();
-    start = new Date();
-    if (type === 'day') {
-        start.setDate(end.getDate() - 1);
-    }
-    else if (type === 'week') {
-        start.setDate(end.getDate() - 7);
-    }
-    else if (type === 'month') {
-        start.setMonth(end.getMonth() - 1);
-    }
-    else if (type === '6months') {
-        start.setMonth(end.getMonth() - 6);
-    }
-    else if (type === 'year') {
-        start.setFullYear(end.getFullYear() - 1);
-    }
-    else if (type === 'all') {
-        start = new Date(0);
-    }
-    else {
-        return res.status(400).json({ error: 'Invalid period type' });
-    }
+    const shouldUseAggregation = type === 'all' || type === 'year';
     try {
-        let records;
-        if (type === 'all' || type === 'year') {
-            const startMs = start.getTime();
-            const endMs = end.getTime();
-            console.log('Fetching all records');
-            records = await prisma.$queryRaw `
-      SELECT
-        DATE("dateBeginGMT" / 1000, 'unixepoch', 'weekday 0') AS "dateBeginGMT", 
-        AVG("actualAIL") AS "actualAIL",
-        AVG("actualPoolPrice") AS "actualPoolPrice"
-      FROM
-        "energyMarketData"
-      WHERE
-        "dateBeginGMT" BETWEEN ${startMs} AND ${endMs} AND "actualPoolPrice" != 0
-      GROUP BY
-        DATE("dateBeginGMT" / 1000, 'unixepoch', 'weekday 0')
-      ORDER BY
-        "dateBeginGMT" ASC;
-      `;
-        }
-        else {
-            records = await prisma.energyMarketData.findMany({
-                orderBy: { dateBeginGMT: 'asc' },
-                select: {
-                    actualAIL: true,
-                    actualPoolPrice: true,
-                    dateBeginGMT: true,
-                },
-                where: {
-                    dateBeginGMT: {
-                        gte: start,
-                        lte: end,
-                    },
-                    actualPoolPrice: {
-                        not: 0,
-                    },
-                },
-            });
-        }
+        const { end, start } = getDateRange(type);
+        const records = shouldUseAggregation
+            ? await fetchAggregatedRecords(start, end)
+            : await fetchDetailedRecords(start, end);
         res.json(records);
     }
-    catch (err) {
-        console.error(err);
+    catch (error) {
+        if (error instanceof Error && error.message === 'Invalid period type') {
+            return res.status(400).json({ error: 'Invalid period type' });
+        }
+        console.error(error);
         res.status(500).json({ error: 'Failed to fetch records' });
     }
 });

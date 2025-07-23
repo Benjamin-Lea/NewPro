@@ -20,7 +20,6 @@ async function scrapeAESOToCSV() {
     const response2 = await fetch(URL);
     if (!response2.ok) throw new Error('Network response was not ok');
     const html2 = await response2.text();
-    console.log("------------------------------------------------------------------------")
 
     // Example: Find table rows and extract columns
     const summaryTable = $('th:contains("SUMMARY")').closest('table');
@@ -68,7 +67,6 @@ async function scrapeAESOToCSV() {
       const tds = $(el).find('td');
       if (tds.length >= 6) {
         const actual = $(tds[2]).text().trim();
-        console.log("Actual: ", actual);
         if (actual && actual != '-') {
               previousHourRow = tds;
         }
@@ -87,9 +85,6 @@ async function scrapeAESOToCSV() {
         actualPoolPrice = parseFloat(actualText);
       }
     }
-
-    console.log(actualPoolPrice, hourAheadPoolPriceForecast, summary, interchange);
-
 
     // Compose CSV row from parsed data
     const csvRows = [
@@ -126,6 +121,6 @@ async function scrapeAESOToCSV() {
     });
 }
 
-
+console.log(Date().toString(), "Scraping AESO data to CSV...");
 scrapeAESOToCSV();
 

@@ -38,13 +38,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const prismaClient = __importStar(require("@prisma/client"));
 const express_1 = __importDefault(require("express"));
-const energyMarket_1 = __importDefault(require("./routes/energyMarket"));
+const EnergyEndPoints_1 = __importDefault(require("./endpoints/EnergyEndPoints"));
 const port = "3000";
 const app = (0, express_1.default)();
 const prisma = new prismaClient.PrismaClient();
+prisma.$connect()
+    .then(() => { console.log("Prisma connected successfully"); })
+    .catch((err) => {
+    console.error("Prisma connection error:", err);
+    process.exit(1);
+});
 app.use(express_1.default.json());
-app.use('/api/energymarket', energyMarket_1.default);
-app.get('/', (_req, res) => res.send('HAPPY API'));
+app.use('/api/dashboard', EnergyEndPoints_1.default);
+app.get('/api', (_req, res) => res.send('HAPPY API'));
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });

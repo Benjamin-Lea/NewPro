@@ -35,7 +35,6 @@ function importCSV() {
         console.error('Error parsing row:', row, err);
       }
       count++;
-      console.log('Processed', count, 'rows');
     })
     .on('end', async () => {
       console.log(`Parsed ${records.length} records. Inserting into DB...`);

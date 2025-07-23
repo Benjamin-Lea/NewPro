@@ -1,41 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;700&display=swap');
+
 #root {
+  font-family: 'Roboto', sans-serif;
   margin: 0 auto;
   text-align: center;
   padding: 0px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+:root {
+  --color-primary: #1976d2;
+  --color-secondary: #e3e3e3;
+  --color-accent: #e91e63;
+  --color-background: #f5f5f5;
+  --color-text: #222222;
+  --color-text-2: #555555;
+  --color-border: #cccccc;
+  --color-accent1: #1976d2;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+:root[data-theme='dark'] {
+  --color-primary: #2b2b2b;
+  --color-secondary: #cccc;
+  --color-accent: #e91e63;
+  --color-background: #1e1e1e;
+  --color-text: #FEC036;
+  --color-text-2: #ffffff;
+  --color-border: #cccc;
+  --color-accent1: #FEC036;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: var(--color-background);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  z-index: 1000;
+  transition: background 0.2s, color 0.2s;
+}
+.theme-toggle:hover {
+  background: var(--color-secondary);
 }
 
-.card {
-  padding: 2em;
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  primary-color: var(--color-primary);
 }
 
-.read-the-docs {
-  color: #888;
-}
