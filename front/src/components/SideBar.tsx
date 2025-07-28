@@ -24,7 +24,8 @@ const Sidebar = () => {
         height: '100vh',
         width: visible ? 240 : 40,
         transition: 'width 0.3s',
-        background: '#f0f2f5',
+        background: 'var(--color-accent1)',
+        color: 'var(--color-accent2)',
         boxShadow: '2px 0 5px rgba(0,0,0,0.1)',
         zIndex: 1000,
         overflow: 'hidden',
@@ -36,13 +37,15 @@ const Sidebar = () => {
           size="small"
           onClick={visible ? closeSidebar : openSidebar}
         >
-          {visible ? <DoubleLeftOutlined /> : <DoubleRightOutlined />}
+          {visible ? <DoubleLeftOutlined style={{color: 'var(--color-accent2)'}}
+          /> : <DoubleRightOutlined style={{color: 'var(--color-accent2)'}}
+            />}
         </Button>
       </div>
       {showText && (
         <div style={{ padding: '16px' }}>
-          <h3>Sidebar</h3>
-          <p>Your sidebar text goes here.</p>
+          <h3>About</h3>
+          <p>This is a real time data for Alberta energy usage and cost!</p>
         </div>
       )}
     </div>

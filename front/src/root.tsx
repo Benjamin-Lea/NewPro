@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { SunOutlined, MoonOutlined } from '@ant-design/icons';
 
 const Root: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -11,8 +12,18 @@ const Root: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   };
   return (
     <>
-      <button className="theme-toggle" onClick={toggleTheme}>
-        {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
+      <button className="theme-toggle"
+        style={{ border: 'none', background: 'transparent' }}
+        onClick={toggleTheme}>
+        {theme === 'light' ? (
+          <>
+            <SunOutlined style={{ marginRight: 4 }} />
+                      </>
+        ) : (
+          <>
+            <MoonOutlined style={{ marginRight: 4 }} />
+          </>
+        )}
       </button>
     {children}
     </>

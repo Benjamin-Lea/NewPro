@@ -16,6 +16,7 @@ const EnergyDataGraph: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [period, setPeriod] = useState<string>('day');
+  const [theme, setTheme] = useState(document.documentElement.getAttribute('data-theme') || 'light');
 
   useEffect(() => {
     setLoading(true);
@@ -38,7 +39,64 @@ const EnergyDataGraph: React.FC = () => {
       });
   }, [period]);
 
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+          setTheme(document.documentElement.getAttribute('data-theme') || 'light');
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   if (error) return <p>Error: {error}</p>;
+
+  const computedStyle = getComputedStyle(document.documentElement);
+  const textColor = computedStyle.getPropertyValue('--color-text-2').trim();
+  const paperBgColor = computedStyle.getPropertyValue('--color-background').trim();
+  const plotBgColor = computedStyle.getPropertyValue('--color-primary').trim();
+  const gridColor = computedStyle.getPropertyValue('--color-border').trim();
+  const demandColor = computedStyle.getPropertyValue('--color-accent1').trim();
+  const priceColor = computedStyle.getPropertyValue('--color-accent').trim();
+
+  const layout = {
+    title: 'Alberta Energy Demand & Pool Price Over Time',
+    autosize: true,
+    dragmode: false,
+    paper_bgcolor: paperBgColor,
+    plot_bgcolor: plotBgColor,
+    yaxis: { 
+      title: 'Demand (MW)',
+      showgrid: true,
+      zeroline: false,
+      showticklabels: true,
+      gridcolor: gridColor,
+      titlefont: { color: textColor },
+      tickfont: { color: textColor },
+    },
+    yaxis2: {
+      title: 'Price ($/MWh)',
+      overlaying: 'y',
+      side: 'right',
+      zeroline: true,
+      showticklabels: true,
+      titlefont: { color: textColor },
+      tickfont: { color: textColor },
+    },
+    xaxis: {
+      title: period === 'day' ? 'Hour' : period === 'week' ? 'Day' : period === 'month' || period === '6months' ? 'Month' : period === 'year' ? 'Year' : 'Date',
+      tickformat: period === 'day' ? '%H:%M' : period === 'week' ? '%a %d' : '%Y-%m-%d',
+      showline: true, showticklabels: true, titlefont: { color: textColor }, tickfont: { color: textColor }
+    },
+    margin: { t: 30, l: 50, r: 50, b: 40 },
+    legend: { orientation: 'h', x: 0.5, y: 1.1, xanchor: 'center', font: { color: textColor },},
+  };
 
   return (
     <div style={{ alignSelf: 'center', margin: '50' }}>
@@ -65,73 +123,23 @@ const EnergyDataGraph: React.FC = () => {
             x: data.map((item) => item.dateBeginGMT),
             y: data.map((item) => item.actualAIL),
             mode: 'lines',
-            name: 'Alberta Energy Demand',
-            marker: { color: 'blue' },
+            name: 'Alberta Energy Demand',           
+            marker: { color: demandColor },
             line: { shape: 'spline' },
             hovertemplate: 'Demand: %{y} MW<br>Time: %{x}<extra></extra>',
           },
           {
             x: data.map((item) => item.dateBeginGMT),
             y: data.map((item) => item.actualPoolPrice),
-            mode: 'lines',
+            mode: 'lines',            
             name: 'Pool Price',
-            marker: { color: 'green'},
+            marker: { color: priceColor },
             line: { shape: 'spline' },
             yaxis: 'y2',
             hovertemplate: 'Price: $%{y}/MWh<br>Time: %{x}<extra></extra>'
           },
         ]}
-        layout={{
-          title: 'Alberta Energy Demand & Pool Price Over Time',
-          autosize: true,
-          dragmode: false,
-          paper_bgcolor: "#2b2b2b", 
-          plot_bgcolor: "#2b2b2b", 
-          yaxis: {
-            title: 'Demand (MW)',
-            showgrid: true,
-            zeroline: false,
-            showticklabels: true,
-            hovertemplate: 'Demand: %{y} MW<br>Time: %{x}<extra></extra>',
-            gridcolor: "grey",
-            titlefont: { color: "white" },
-            tickfont: { color: "white" },
-          },
-          yaxis2: {
-            title: 'Price ($/MWh)',
-            overlaying: 'y',
-            side: 'right',
-            zeroline: true,
-            showticklabels: true,
-            titlefont: { color: "white" },
-            tickfont: { color: "white" },
-          },
-          xaxis: {
-            title:
-              period === 'day'
-                ? 'Hour'
-                : period === 'week'
-                ? 'Day'
-                : period === 'month' || period === '6months'
-                ? 'Month'
-                : period === 'year'
-                ? 'Year'
-                : 'Date',
-            tickformat:
-              period === 'day'
-                ? '%H:%M'
-                : period === 'week'
-                ? '%a %d'
-                : '%Y-%m-%d',
-            showline: true,
-            showticklabels: true,
-            titlefont: { color: "white" },
-            tickfont: { color: "white" },
-
-          },
-          margin: { t: 30, l: 50, r: 50, b: 40 },
-          legend: { orientation: 'h', x: 0.5, y: 1.1, xanchor: 'center' },
-        }}
+        layout={layout}
         config={{
           displaylogo: false,
           displayModeBar: false,

@@ -8,6 +8,7 @@ function App() {
   const [count, setCount] = useState<number>(0);
   return (
     <>
+      <a href="/dashboard">Go to Dashboard</a>
       <Sidebar />
     </>
   );
