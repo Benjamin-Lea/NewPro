@@ -17,6 +17,8 @@
   --color-border: #b9aeae;
   --color-accent1: #112D4E;
   --color-accent2: #d0d0d0;
+  --color-price:#112D4E;
+  --color-demand:#e74c3c;
 }
 
 :root {
@@ -29,6 +31,8 @@
   --color-border: #cccc;
   --color-accent1: #414141;
   --color-accent2: #FEC036;
+  --color-price:#FEC036;
+  --color-demand:#e74c3c;
 }
 
 .theme-toggle {

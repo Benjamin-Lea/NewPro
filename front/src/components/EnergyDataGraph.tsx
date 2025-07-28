@@ -62,8 +62,8 @@ const EnergyDataGraph: React.FC = () => {
   const paperBgColor = computedStyle.getPropertyValue('--color-background').trim();
   const plotBgColor = computedStyle.getPropertyValue('--color-primary').trim();
   const gridColor = computedStyle.getPropertyValue('--color-border').trim();
-  const demandColor = computedStyle.getPropertyValue('--color-accent1').trim();
-  const priceColor = computedStyle.getPropertyValue('--color-accent').trim();
+  const demandColor = computedStyle.getPropertyValue('--color-demand').trim();
+  const priceColor = computedStyle.getPropertyValue('--color-price').trim();
 
   const layout = {
     title: 'Alberta Energy Demand & Pool Price Over Time',
